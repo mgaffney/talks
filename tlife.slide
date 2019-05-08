@@ -1,0 +1,143 @@
+Conway's Game of Life for your terminal
+
+Mike Gaffney
+Software Engineer, HashiCorp
+https://github.com/mgaffney
+@mgaffney
+
+* Quote
+
+_And_will_you_succeed?_Yes_you_will_indeed!_(98_and_3/4_percent_guaranteed.)_
+
+— Dr. Seuss
+
+* I always wanted to write a ...
+
+App with a terminal GUI
+Like `top` or `vim`
+… just not as complicated
+
+One day, while browsing the interwebs, I rediscovered [[https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life][Conway's Game of Life]].
+Plus, I had some free time!
+
+* Conway's Game of Life
+
+The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, alive or dead, (or populated and unpopulated, respectively). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:
+
+1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+2. Any live cell with two or three live neighbours lives on to the next generation.
+3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
+* Conway's Game of Life
+
+.image tlife/failedoscillator1.gif 180 _
+.image tlife/fourgliders.gif _ 280
+
+: Give demo of tlife
+
+* Plan #1
+
+* Plan #1
+
+- Use the [[github.com/nsf/termbox-go][termbox]] package
+- Implement everything in main package
+- No need for unit tests (there's only 4 rules!)
+- I should be done before my wife even notices I have "free time"
+
+* Termbox
+
+Got lots of ideas from termbox's [[https://github.com/nsf/termbox-go/blob/master/_demos/paint.go][paint.go]] demo
+
+: Give demo of paint
+
+.code tlife/paint.go /func.*main/,87
+.code tlife/paint.go 56,61
+
+* Termbox - mainloop
+
+.code tlife/paint.go /mainloop/,/^}/
+
+* Termbox
+
+.code tlife/paint.go /func.*update_and_redraw_all/,/^}/
+
+* Termbox
+
+*Idea:* Reuse/overload `termbox.Cell`!
+
+	// A cell, single conceptual entity on the screen. The screen is basically a 2d
+	// array of cells. 'Ch' is a unicode character, 'Fg' and 'Bg' are foreground
+	// and background attributes respectively.
+	type Cell struct {
+		Ch rune
+		Fg Attribute
+		Bg Attribute
+	}
+
+* Plan #1 Fails
+
+- Termbox was fairly straightforward
+- Reusing `termbox.Cell` never worked out
+- Mixing display logic with Game of Life logic was messy and made it very difficult to test
+- My wife noticed all the "free time" I had and "fixed that problem"
+
+* Plan #2
+
+* Plan #2
+
+Continue to use the [[github.com/nsf/termbox-go][termbox]] package
+
+Use 2 packages:
+
+- `main` package for display logic
+- `life` package for implementing Conway's Game of Life
+
+Hide my "free time" from my wife by working on chunks.
+
+* Plan #2
+
+Use a modified TDD approach:
+
+1. Define/design the public interface (functions, types, methods) for the `life` package.
+2. Write the godoc for each of the public functions, types, and methods.
+3. Write the unit tests.
+4. Implement the `life` package.
+
+* life package
+
+.code tlife/life.go 8,15
+.code tlife/life.go 17,21
+.code tlife/life.go 23,24
+
+* life package
+
+.code tlife/life.go 65,66
+.code tlife/life.go 76,77
+.code tlife/life.go 42,52
+
+* life package
+
+.code tlife/life.go 87,104
+
+* Plan #2 Succeeds!
+
+Small code base:
+
+SLOC (source lines of code)
+~341 total
+~166 application code
+~175 test code
+
+- Wife never noticed any of my "free time"
+
+* One of the best books on software design
+
+[[https://www.amazon.com/Philosophy-Software-Design-John-Ousterhout/dp/1732102201][A Philosophy of Software Design by John Ousterhout]]
+.image tlife/bookcover.jpeg 400 _
+
+Relatively small @ 190 pages
+
+* Source Code
+
+[[https://github.com/mgaffney/tlife][github.com/mgaffney/tlife]]
